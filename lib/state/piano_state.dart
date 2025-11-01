@@ -12,6 +12,7 @@ class PianoState with ChangeNotifier {
   PianoState() {
     _prefsBox = Hive.box('pianoPrefs');
     _initialize();
+
     _connSub = Connectivity().onConnectivityChanged.listen((status) {
       if (status.contains(ConnectivityResult.none)) {
         resetInstrument(); // auto‑reset when you go offline
@@ -27,6 +28,11 @@ class PianoState with ChangeNotifier {
 
   void _initialize() async {
     await _loadFromHive();
+
+    // ✅ On every app launch, reset _showingScore
+    _showingScore = false;
+
+    notifyListeners();
   }
 
   Future<void> _loadFromHive() async {
