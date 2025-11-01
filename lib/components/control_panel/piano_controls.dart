@@ -125,7 +125,7 @@ class _ControlPanelState extends State<ControlPanel> {
               bottomRight: Radius.circular(15),
               bottomLeft: Radius.circular(15))),
       width: double.infinity,
-      height: pianoState.showingScore ? pianoState.panelHeight : screenHeight / 3.5,
+      height: pianoState.showingScore ? screenHeight / 1.8 : screenHeight / 3.5,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

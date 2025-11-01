@@ -214,14 +214,12 @@ class PianoState with ChangeNotifier {
   void showScore(String piece, double screenHeight) {
     _selectedPiece = piece;
     _showingScore = true;
-    setPanelHeight(screenHeight / 1.8);
     notifyListeners();
   }
 
   void hideScore(double screenHeight) {
     _selectedPiece = null;
     _showingScore = false;
-    setPanelHeight(screenHeight / 3.5);
     notifyListeners();
   }
 
@@ -229,12 +227,6 @@ class PianoState with ChangeNotifier {
   void setLoopEnabled(bool val) {
     _loopEnabled = val;
     _prefsBox.put('loopEnabled', val);
-    notifyListeners();
-  }
-
-  void setPanelHeight(double val) {
-    _panelHeight = val;
-    _prefsBox.put('panelHeight', val);
     notifyListeners();
   }
 
