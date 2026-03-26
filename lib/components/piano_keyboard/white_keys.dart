@@ -56,26 +56,26 @@ class _WhiteKeyState extends State<WhiteKey> {
                 end: Alignment.bottomCenter,
                 colors: _isPressed
                     ? [
-                  Colors.grey.withOpacity(0.1),
-                  Colors.grey.withOpacity(0.05),
+                  Colors.grey.withValues(alpha: 0.1),
+                  Colors.grey.withValues(alpha: 0.05),
                 ]
                     : isHighlighted
                     ? [
                   Colors.white,
-                  Theme.of(context).primaryColor.withOpacity(0.18),
+                  Theme.of(context).primaryColor.withValues(alpha: 0.18),
                 ]
                     : [Colors.white, Colors.grey.shade100],
               ),
               borderRadius: _getBorderRadius(widget.keyType),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.25),
+                  color: Colors.black.withValues(alpha: 0.25),
                   offset: const Offset(2, 3), // slight right-down shadow
                   blurRadius: 6,
                   spreadRadius: 0,
                 ),
                 BoxShadow(
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                   offset: const Offset(-1, -1), // subtle top-left highlight
                   blurRadius: 2,
                 ),

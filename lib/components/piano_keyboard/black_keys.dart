@@ -24,11 +24,13 @@ class _BlackKeyState extends State<BlackKey> {
     final octave = pianoState.octave;
     final midiNote = 12 + (octave * 12) + widget.idx;
     final isHighlighted = pianoState.activePlayAlongNotes.contains(midiNote);
+    final screenHeight = MediaQuery.of(context).size.height;
+
 
     // same height logic you had before
     final double keyHeight = pianoState.showingScore
-        ? pianoState.panelHeight! * 0.35
-        : MediaQuery.of(context).size.height * 0.33;
+        ? screenHeight * 0.194
+        : screenHeight * 0.33;
 
     return GestureDetector(
       onPanStart: (details) {
@@ -71,25 +73,25 @@ class _BlackKeyState extends State<BlackKey> {
                 boxShadow: [
                   // drop shadow to suggest height
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.55),
+                    color: Colors.black.withValues(alpha: 0.55),
                     offset: const Offset(3, 6),
                     blurRadius: 10,
                   ),
                   // subtle rim highlight on left/top edge
                   BoxShadow(
-                    color: Colors.white.withOpacity(0.03),
+                    color: Colors.white.withValues(alpha: 0.03),
                     offset: const Offset(-1, -1),
                     blurRadius: 2,
                   ),
                   // subtle rim highlight on bottom/right edge
                   BoxShadow(
-                    color: Colors.white.withOpacity(0.03),
+                    color: Colors.white.withValues(alpha: 0.03),
                     offset: const Offset(-1, 1),
                     blurRadius: 2,
                   ),
                 ],
                 border: _isPressed
-                    ? Border.all(color: Colors.white.withOpacity(0.12), width: 1.2)
+                    ? Border.all(color: Colors.white.withValues(alpha: 0.12), width: 1.2)
                     : null,
               ),
             ),
@@ -108,8 +110,8 @@ class _BlackKeyState extends State<BlackKey> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.white.withOpacity(0.12),
-                        Colors.white.withOpacity(0.06),
+                        Colors.white.withValues(alpha: 0.12),
+                        Colors.white.withValues(alpha: 0.06),
                         Colors.transparent,
                       ],
                       stops: const [0.0, 0.35, 1.0],
@@ -132,8 +134,8 @@ class _BlackKeyState extends State<BlackKey> {
                       end: Alignment.topCenter,
                       begin: Alignment.bottomCenter,
                       colors: [
-                        Colors.white.withOpacity(_isPressed ? 0.20 : 0.12),
-                        Colors.white.withOpacity(0.06),
+                        Colors.white.withValues(alpha: _isPressed ? 0.20 : 0.12),
+                        Colors.white.withValues(alpha: 0.06),
                         Colors.transparent,
                       ],
                       stops: const [0.0, 0.35, 1.0],
@@ -156,8 +158,8 @@ class _BlackKeyState extends State<BlackKey> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Colors.white.withOpacity(0.06),
-                        Colors.white.withOpacity(0.06),
+                        Colors.white.withValues(alpha: 0.06),
+                        Colors.white.withValues(alpha: 0.06),
                         Colors.transparent,
                       ],
                     ),
@@ -178,7 +180,7 @@ class _BlackKeyState extends State<BlackKey> {
                       end: Alignment.topLeft,
                       begin: Alignment.bottomRight,
                       colors: [
-                        Colors.white.withOpacity(0.06),
+                        Colors.white.withValues(alpha: 0.06),
                         Colors.transparent,
                       ],
                     ),
@@ -199,7 +201,7 @@ class _BlackKeyState extends State<BlackKey> {
                       end: Alignment.topLeft,
                       begin: Alignment.bottomRight,
                       colors: [
-                        Colors.white.withOpacity(0.06),
+                        Colors.white.withValues(alpha: 0.06),
                         Colors.transparent,
                       ],
                     ),
@@ -214,7 +216,7 @@ class _BlackKeyState extends State<BlackKey> {
                 child: IgnorePointer(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.02),
+                      color: Colors.white.withValues(alpha: 0.02),
                       borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(6),
                         bottomRight: Radius.circular(6),

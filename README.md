@@ -21,7 +21,7 @@ Intuitive UI: Sleek design with easy access to settings and practice sessions.
 
 1. Clone the repository:
 
-git clone https://github.com/adelaykay/empyreal_keys.git
+git clone https://github.com/empyrealworks/empyreal_keys.git
 
 
 2. Navigate to the project folder:

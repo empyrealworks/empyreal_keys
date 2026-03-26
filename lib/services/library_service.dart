@@ -1,11 +1,9 @@
 // services/library_service.dart
-import 'package:empyrealkeys/services/recording_migrator.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import '../models/recording.dart';
-import '../models/note_event.dart';
 import 'midi_parser.dart';
 
 class LibraryService {
@@ -95,7 +93,9 @@ class LibraryService {
 
       return recording;
     } catch (e) {
-      print('Error loading library piece $title: $e');
+      if (kDebugMode) {
+        print('Error loading library piece $title: $e');
+      }
       return null;
     }
   }
@@ -116,7 +116,9 @@ class LibraryService {
 
       return importedRecording;
     } catch (e) {
-      print('Error importing MIDI file: $e');
+      if (kDebugMode) {
+        print('Error importing MIDI file: $e');
+      }
       return null;
     }
   }
