@@ -1,6 +1,6 @@
-# Empyreal Keys
+# Piano
 
-Empyreal Keys is an interactive piano app designed for musicians of all levels. It helps users improve their musical skills through exercises, tuning aids, and ear training games.
+Piano is an interactive piano app designed for musicians of all levels. It helps users improve their musical skills through exercises, tuning aids, and ear training games.
 
 ## Features
 
@@ -46,7 +46,7 @@ Contributions are welcome! Feel free to submit issues or pull requests.
 
 ## License Summary
 
-**Vocal Memo** is proprietary software developed and owned by **Empyreal Digital Works**.  
+**Piano** is proprietary software developed and owned by **Empyreal Digital Works**.
 The source code and all accompanying assets are **not open-source** and may not be copied, modified, or redistributed without explicit permission.
 
 Personal and internal business use is allowed under the [Proprietary/Commercial License](./LICENSE.md).  

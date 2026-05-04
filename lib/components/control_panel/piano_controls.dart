@@ -208,7 +208,7 @@ class _ControlPanelState extends State<ControlPanel> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         OctaveSelector(),
-                        Display(),
+                        Flexible(child: Display()),
                         Listener(
                           onPointerDown: (_) {
                             setState(() {

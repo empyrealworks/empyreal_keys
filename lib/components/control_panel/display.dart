@@ -43,7 +43,9 @@ class Display extends StatelessWidget {
         ),
         margin: EdgeInsets.symmetric(horizontal: MediaQuery.sizeOf(context).width * 0.02),
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        width: MediaQuery.sizeOf(context).width / 2.5,
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.sizeOf(context).width / 2.5,
+        ),
         height: MediaQuery.sizeOf(context).width * 0.09,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,

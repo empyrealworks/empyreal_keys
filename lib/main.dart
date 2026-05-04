@@ -38,15 +38,9 @@ void main() async {
   await libraryService.initialize();
 
   try {
-    if (kDebugMode) {
-      print('///...Initializing...///');
-    }
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    if (kDebugMode) {
-      print('///...Initializion complete...///');
-    }
   } catch (e) {
     if (kDebugMode) {
       print('Failed to initialize Firebase: $e');
@@ -58,9 +52,6 @@ void main() async {
       androidProvider: AndroidProvider.playIntegrity,
       appleProvider: AppleProvider.debug,
     );
-    if (kDebugMode) {
-      print('///...App check complete...///');
-    }
   } catch (e) {
     if (kDebugMode) {
       print("Failed to activate Firebase App Check: $e");
@@ -83,18 +74,18 @@ void main() async {
         ChangeNotifierProvider(create: (context) => PlayAlongService()),
         Provider.value(value: libraryService),
       ],
-      child: const PiaKnowApp()
+      child: const PianoApp()
   ));
 }
 
-class PiaKnowApp extends StatelessWidget {
-  const PiaKnowApp({super.key});
+class PianoApp extends StatelessWidget {
+  const PianoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Pia-Know',
+      title: 'Piano',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,

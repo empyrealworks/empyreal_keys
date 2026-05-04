@@ -16,37 +16,25 @@ class MidiProvider with ChangeNotifier {
 
   // Load the soundfont file
   void loadMidi(String font) async {
-    if (kDebugMode) {
-      print('Loading soundfont: $font');
-    }
 
     // Ensure the soundfont is downloaded or exists locally
     await soundfontService.loadSoundfont(font);
 
     // Retrieve the local path of the soundfont file
     String localPath = await soundfontService.getSoundfontPath(font);
-    if (kDebugMode) {
-      print('Local path: $localPath');
-    }
 
     // Print list of downloaded soundfonts
     List<String> downloadedSoundfonts = await soundfontService.getListOfLocalSoundfonts();
-    if (kDebugMode) {
-      print('Downloaded soundfonts: $downloadedSoundfonts');
-    }
     this.downloadedSoundfonts = downloadedSoundfonts;
 
     // Load the soundfont using the local path
-    isSoundfontLoaded = await FlutterMidi16kb.loadSoundfont(
+    bool success = await FlutterMidi16kb.loadSoundfont(
       localPath, // Use the downloaded file path
     );
-    if (kDebugMode) {
-      print('Soundfont loaded: $isSoundfontLoaded');
-    }
 
-    // Indicate that the soundfont has been successfully loaded
-    isSoundfontLoaded = true;
-    notifyListeners(); // Notify listeners that the soundfont is ready
+    // Update the loaded state and notify listeners
+    isSoundfontLoaded = success;
+    notifyListeners();
   }
 
   // Unload the soundfont file

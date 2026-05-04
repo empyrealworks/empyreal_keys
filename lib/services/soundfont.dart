@@ -34,27 +34,14 @@ class SoundfontService {
   Future<void> downloadSoundfont(String filename) async {
     final directory = await getApplicationDocumentsDirectory();
     final filePath = '${directory.path}/$filename';
-    if (kDebugMode) {
-      print('Downloading to: $filePath');
-    }
 
     final ref = _storage.ref().child('soundfonts/$filename');
     try {
-      // Fetch download URL
       final downloadUrl = await ref.getDownloadURL();
-      if (kDebugMode) {
-        print('Download URL: $downloadUrl');
-      }
 
       // Use Dio for downloading the soundfont
       final dio = Dio();
       await dio.download(downloadUrl, filePath);
-
-      // Verify the file was downloaded
-      bool fileExists = await File(filePath).exists();
-      if (kDebugMode) {
-        print(fileExists ? 'File downloaded successfully' : 'File download failed');
-      }
     } catch (e) {
       if (kDebugMode) {
         print('Error downloading soundfont: $e');

@@ -25,9 +25,6 @@ class _PianoKeysState extends State<PianoKeys> {
     setState(() {
       _displayedNote = note;
     });
-    if (kDebugMode) {
-      print(_displayedNote);
-    }
   }
 
   @override
