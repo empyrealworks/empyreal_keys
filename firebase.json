@@ -1,1 +1,36 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"piaknow-app","appId":"1:560713338184:android:9f75179a4267d34ee6377d","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"piaknow-app","configurations":{"android":"1:560713338184:android:9f75179a4267d34ee6377d","web":"1:560713338184:web:a7c85d460e1587b1e6377d"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "piaknow-app",
+          "appId": "1:560713338184:android:9f75179a4267d34ee6377d",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "piaknow-app",
+          "configurations": {
+            "android": "1:560713338184:android:9f75179a4267d34ee6377d",
+            "web": "1:560713338184:web:a7c85d460e1587b1e6377d"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
