@@ -79,7 +79,7 @@ class _AboutDialogWidgetState extends State<AboutDialogWidget> {
 
               const SizedBox(height: 24),
               Text(
-                'Developed by Adeleke Olasope\n© 2025 Empyreal Digital Works',
+                'Developed by Adeleke Olasope\n© 2026 Empyreal Digital Works',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium!
                     .copyWith(color: Colors.grey[700]),
