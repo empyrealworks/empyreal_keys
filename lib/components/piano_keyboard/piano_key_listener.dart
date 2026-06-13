@@ -33,202 +33,155 @@ class PianoKeyListener extends StatefulWidget {
 }
 
 class _PianoKeyListenerState extends State<PianoKeyListener> {
-  // Use a map to track the last played note for each pointer
-  final Map<int, int> _lastPlayedNoteByPointer = {};
+  // Track the root note for each pointer
+  final Map<int, int> _rootNoteByPointer = {};
+  // Track all MIDI notes (including chords) started by each pointer
+  final Map<int, Set<int>> _activeNotesByPointer = {};
 
-  // void _playNote(MidiProvider midiProvider, int midiNote, int volume) {
-  //   try {
-  //     midiProvider.playNote(midiNote: midiNote, velocity: volume);
-  //   } catch (e) {
-  //     if (kDebugMode) {
-  //       print('An error occurred: $e');
-  //     }
-  //   }
-  // }
-  // void _stopNote(MidiProvider midiProvider, int midiNote) {
-  //   midiProvider.stopNote(midiNote: midiNote);
-  // }
+  void _updatePianoState() {
+    final allPressed = _activeNotesByPointer.values.expand((e) => e).toSet();
+    Provider.of<PianoState>(context, listen: false).setPressedNotes(allPressed);
+  }
+
+  Set<int> _playNoteOrChord(int midiNote) {
+    final pianoState = Provider.of<PianoState>(context, listen: false);
+    final midiProvider = Provider.of<MidiProvider>(context, listen: false);
+    final recorder = context.read<RecorderService>();
+    final volume = pianoState.volume;
+    final isChordMode = pianoState.isChordMode;
+    final chordFormulas = pianoState.chordFormulas;
+    final chordType = pianoState.chordType;
+
+    Set<int> notesToPlay = {};
+    if (isChordMode) {
+      List<int> intervals = chordFormulas[chordType] ?? [0];
+      for (int interval in intervals) {
+        notesToPlay.add(midiNote + interval);
+      }
+    } else {
+      notesToPlay.add(midiNote);
+    }
+
+    for (int note in notesToPlay) {
+      midiProvider.playNote(midiNote: note, velocity: volume);
+      if (recorder.isRecording) {
+        recorder.recordNoteOn(note, volume);
+      }
+    }
+    return notesToPlay;
+  }
+
+  void _stopNotes(Set<int> notes) {
+    final midiProvider = Provider.of<MidiProvider>(context, listen: false);
+    final recorder = context.read<RecorderService>();
+
+    for (int note in notes) {
+      midiProvider.stopNote(midiNote: note);
+      if (recorder.isRecording) {
+        recorder.recordNoteOff(note);
+      }
+    }
+  }
+
+  int? _getMidiNoteAt(Offset localPosition, Size size) {
+    final pianoState = Provider.of<PianoState>(context, listen: false);
+    final octave = pianoState.octave;
+    final double keyWidth = size.width / widget.numberOfKeys;
+    final double keyHeight = size.height;
+
+    // Check black keys first
+    final int blackCount = min(widget.blackKeyIndices.length, widget.blackKeyOffsets.length);
+    for (int i = 0; i < blackCount; i++) {
+      final double keyLeft = widget.whiteKeyWidth * widget.blackKeyOffsets[i];
+      final double keyRight = keyLeft + widget.blackKeyWidth;
+      final double keyTop = 0;
+      final double keyBottom = keyHeight * 0.6;
+
+      if (localPosition.dx >= keyLeft &&
+          localPosition.dx <= keyRight &&
+          localPosition.dy >= keyTop &&
+          localPosition.dy <= keyBottom) {
+        return 12 + (octave * 12) + widget.blackKeyIndices[i];
+      }
+    }
+
+    // Check white keys
+    for (int i = 0; i < widget.whiteKeyIndices.length; i++) {
+      final double keyLeft = i * keyWidth;
+      final double keyRight = (i + 1) * keyWidth;
+      if (localPosition.dx >= keyLeft &&
+          localPosition.dx < keyRight &&
+          localPosition.dy >= 0 &&
+          localPosition.dy <= keyHeight) {
+        return 12 + (octave * 12) + widget.whiteKeyIndices[i];
+      }
+    }
+    return null;
+  }
+
+  void _onPointerDown(PointerDownEvent details) {
+    final RenderBox box = context.findRenderObject() as RenderBox;
+    final Offset localPosition = box.globalToLocal(details.position);
+    final int? midiNote = _getMidiNoteAt(localPosition, box.size);
+
+    if (midiNote != null) {
+      _rootNoteByPointer[details.pointer] = midiNote;
+      final notes = _playNoteOrChord(midiNote);
+      _activeNotesByPointer[details.pointer] = notes;
+      
+      final pianoState = Provider.of<PianoState>(context, listen: false);
+      pianoState.setCurrentNote(pianoState.notes[midiNote % 12]);
+      _updatePianoState();
+    }
+  }
+
+  void _onPointerMove(PointerMoveEvent details) {
+    final RenderBox box = context.findRenderObject() as RenderBox;
+    final Offset localPosition = box.globalToLocal(details.position);
+    final int? midiNote = _getMidiNoteAt(localPosition, box.size);
+
+    final int? lastRootNote = _rootNoteByPointer[details.pointer];
+    if (midiNote != lastRootNote) {
+      // Stop old notes
+      final oldNotes = _activeNotesByPointer.remove(details.pointer);
+      if (oldNotes != null) {
+        _stopNotes(oldNotes);
+      }
+
+      if (midiNote != null) {
+        _rootNoteByPointer[details.pointer] = midiNote;
+        final newNotes = _playNoteOrChord(midiNote);
+        _activeNotesByPointer[details.pointer] = newNotes;
+        
+        final pianoState = Provider.of<PianoState>(context, listen: false);
+        pianoState.setCurrentNote(pianoState.notes[midiNote % 12]);
+      } else {
+        _rootNoteByPointer.remove(details.pointer);
+      }
+      _updatePianoState();
+    }
+  }
+
+  void _onPointerUpOrCancel(PointerEvent details) {
+    _rootNoteByPointer.remove(details.pointer);
+    final notes = _activeNotesByPointer.remove(details.pointer);
+    if (notes != null) {
+      _stopNotes(notes);
+    }
+    
+    if (_activeNotesByPointer.isEmpty) {
+      Provider.of<PianoState>(context, listen: false).setCurrentNote('..');
+    }
+    _updatePianoState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isChordMode = Provider.of<PianoState>(context, listen: false).isChordMode;
-    final chordFormulas = Provider.of<PianoState>(context, listen: false).chordFormulas;
-    final chordType = Provider.of<PianoState>(context, listen: false).chordType;
-
-    void playNoteOrChord(MidiProvider midiProvider, int midiNote, int volume){
-      if (isChordMode) {
-        // Play a chord
-        List<int> intervals = chordFormulas[chordType]!;
-        for (int interval in intervals) {
-          int note = midiNote + interval;
-          midiProvider.playNote(midiNote: note, velocity: volume);
-          final recorder = context.read<RecorderService>();
-          if (recorder.isRecording) {
-            recorder.recordNoteOn(midiNote, volume);
-          }
-        }
-      } else {
-        // Play a single note
-        midiProvider.playNote(midiNote: midiNote, velocity: volume);
-        final recorder = context.read<RecorderService>();
-        if (recorder.isRecording) {
-          recorder.recordNoteOn(midiNote, volume);
-        }
-      }
-    }
-
-    void stopNoteOrChord(MidiProvider midiProvider, int midiNote) {
-      if (isChordMode) {
-        // Stop all notes in the chord
-        List<int> intervals = chordFormulas[chordType]!;
-        for (int interval in intervals) {
-          int note = midiNote + interval;
-          midiProvider.stopNote(midiNote: note);
-          final recorder = context.read<RecorderService>();
-          if (recorder.isRecording) {
-            recorder.recordNoteOff(note);
-          }
-        }
-      } else {
-        // Stop the single note
-        midiProvider.stopNote(midiNote: midiNote);
-        final recorder = context.read<RecorderService>();
-        if (recorder.isRecording) {
-          recorder.recordNoteOff(midiNote);
-        }
-      }
-    }
-
     return Listener(
-      onPointerDown: (details) {
-        final RenderBox box = context.findRenderObject() as RenderBox;
-        final Offset localPosition = box.globalToLocal(details.position);
-        final Size size = box.size;
-        final double keyWidth = size.width / widget.numberOfKeys;
-        final double keyHeight = size.height;
-        final pianoState = Provider.of<PianoState>(context, listen: false);
-        final notes = pianoState.notes;
-        final octave = pianoState.octave;
-        final volume = pianoState.volume;
-        bool blackKeyPressed = false;
-        int? playedNote;
-        // Check for black key presses first
-        final int blackCount = min(
-          widget.blackKeyIndices.length,
-          widget.blackKeyOffsets.length,
-        );
-        for (int i = 0; i < blackCount; i++) {
-          final double keyLeft = widget.whiteKeyWidth * widget.blackKeyOffsets[i];
-          final double keyRight = keyLeft + widget.blackKeyWidth;
-          final double keyTop = 0;
-          final double keyBottom = keyHeight * 0.6; // Black keys are shorter
-          int midiNote = 12 + (octave * 12) + widget.blackKeyIndices[i];
-          if (localPosition.dx >= keyLeft &&
-              localPosition.dx <= keyRight &&
-              localPosition.dy >= keyTop &&
-              localPosition.dy <= keyBottom) {
-            playedNote = midiNote;
-            _lastPlayedNoteByPointer[details.pointer] = midiNote;
-            playNoteOrChord(Provider.of<MidiProvider>(context, listen: false), midiNote, volume);
-            pianoState.setCurrentNote(notes[widget.blackKeyIndices[i]]);
-            blackKeyPressed = true;
-            break; // Exit loop if a black key is pressed
-          }
-        }
-        // Check for white key presses only if no black key was pressed
-        if (!blackKeyPressed) {
-          for (int i = 0; i < widget.whiteKeyIndices.length; i++) {
-            final double keyLeft = i * keyWidth;
-            final double keyRight = (i + 1) * keyWidth;
-            int midiNote = 12 + (octave * 12) + widget.whiteKeyIndices[i];
-            if (localPosition.dx >= keyLeft &&
-                localPosition.dx <= keyRight &&
-                localPosition.dy >= 0 &&
-                localPosition.dy <= keyHeight) {
-              playedNote = midiNote;
-              _lastPlayedNoteByPointer[details.pointer] = midiNote;
-              playNoteOrChord(Provider.of<MidiProvider>(context, listen: false), midiNote, volume);
-              pianoState.setCurrentNote(notes[widget.whiteKeyIndices[i]]);
-            }
-          }
-        }
-      },
-      onPointerUp: (details) {
-        final int? lastPlayedNote = _lastPlayedNoteByPointer.remove(details.pointer);
-        if (lastPlayedNote != null) {
-          stopNoteOrChord(Provider.of<MidiProvider>(context, listen: false), lastPlayedNote);
-        }
-        if (_lastPlayedNoteByPointer.isEmpty) {
-          Provider.of<PianoState>(context, listen: false).setCurrentNote('..');
-        }
-      },
-      onPointerMove: (details) {
-        final RenderBox box = context.findRenderObject() as RenderBox;
-        final Offset localPosition = box.globalToLocal(details.position);
-        final Size size = box.size;
-        final double keyWidth = size.width / widget.numberOfKeys;
-        final double keyHeight = size.height;
-        final pianoState = Provider.of<PianoState>(context, listen: false);
-        final notes = pianoState.notes;
-        final octave = pianoState.octave;
-        final volume = pianoState.volume;
-        bool blackKeyPressed = false;
-        int? playedNote;
-
-        // Check for black key presses first
-        final int blackCount = min(
-          widget.blackKeyIndices.length,
-          widget.blackKeyOffsets.length,
-        );
-        for (int i = 0; i < blackCount; i++) {
-          final double keyLeft = widget.whiteKeyWidth * widget.blackKeyOffsets[i];
-          final double keyRight = keyLeft + widget.blackKeyWidth;
-          final double keyTop = 0;
-          final double keyBottom = keyHeight * 0.6; // Black keys are shorter
-          int midiNote = 12 + (octave * 12) + widget.blackKeyIndices[i];
-          if (localPosition.dx >= keyLeft &&
-              localPosition.dx <= keyRight &&
-              localPosition.dy >= keyTop &&
-              localPosition.dy <= keyBottom) {
-            playedNote = midiNote;
-            final int? lastPlayedNote = _lastPlayedNoteByPointer[details.pointer];
-            if (midiNote != lastPlayedNote) {
-              // New note, play it
-              playNoteOrChord(Provider.of<MidiProvider>(context, listen: false), midiNote, volume);
-              if (lastPlayedNote != null) {
-                stopNoteOrChord(Provider.of<MidiProvider>(context, listen: false), lastPlayedNote);
-              }
-              pianoState.setCurrentNote(notes[widget.blackKeyIndices[i]]);
-              _lastPlayedNoteByPointer[details.pointer] = midiNote;
-            }
-            blackKeyPressed = true;
-            break;
-          }
-        }
-        // Check for white key presses only if no black key was pressed
-        if (!blackKeyPressed) {
-          for (int i = 0; i < widget.whiteKeyIndices.length; i++) {
-            final double keyLeft = i * keyWidth;
-            final double keyRight = (i + 1) * keyWidth;
-            int midiNote = 12 + (octave * 12) + widget.whiteKeyIndices[i];
-            if (localPosition.dx >= keyLeft &&
-                localPosition.dx <= keyRight &&
-                localPosition.dy >= 0 &&
-                localPosition.dy <= keyHeight) {
-              playedNote = midiNote;
-              final int? lastPlayedNote = _lastPlayedNoteByPointer[details.pointer];
-              if (midiNote != lastPlayedNote) {
-                playNoteOrChord(Provider.of<MidiProvider>(context, listen: false), midiNote, volume);
-                if (lastPlayedNote != null) {
-                  stopNoteOrChord(Provider.of<MidiProvider>(context, listen: false), lastPlayedNote);
-                }
-                pianoState.setCurrentNote(notes[widget.whiteKeyIndices[i]]);
-                _lastPlayedNoteByPointer[details.pointer] = midiNote;
-              }
-            }
-          }
-        }
-      },
+      onPointerDown: _onPointerDown,
+      onPointerMove: _onPointerMove,
+      onPointerUp: _onPointerUpOrCancel,
+      onPointerCancel: _onPointerUpOrCancel,
       child: widget.child,
     );
   }

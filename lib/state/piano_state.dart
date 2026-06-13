@@ -65,6 +65,7 @@ class PianoState with ChangeNotifier {
   double? _panelHeight;
   String? _selectedPiece;
   Set<int> _activePlayAlongNotes = {};
+  Set<int> _pressedNotes = {};
 
 
   // Recorder State
@@ -209,6 +210,7 @@ class PianoState with ChangeNotifier {
   String? get selectedPiece => _selectedPiece;
   bool get showingScore => _showingScore;
   Set<int> get activePlayAlongNotes => _activePlayAlongNotes;
+  Set<int> get pressedNotes => _pressedNotes;
 
 
   void showScore(String piece, double screenHeight) {
@@ -248,6 +250,23 @@ class PianoState with ChangeNotifier {
   void clearActivePlayAlongNotes() {
     _activePlayAlongNotes.clear();
     notifyListeners();
+  }
+
+  void setPressedNotes(Set<int> notes) {
+    _pressedNotes = notes;
+    notifyListeners();
+  }
+
+  void addPressedNote(int note) {
+    if (_pressedNotes.add(note)) {
+      notifyListeners();
+    }
+  }
+
+  void removePressedNote(int note) {
+    if (_pressedNotes.remove(note)) {
+      notifyListeners();
+    }
   }
 
   //Metronome Setters
