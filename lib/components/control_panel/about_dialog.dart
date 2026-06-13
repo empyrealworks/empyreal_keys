@@ -9,7 +9,7 @@ class AboutDialogWidget extends StatefulWidget {
 }
 
 class _AboutDialogWidgetState extends State<AboutDialogWidget> {
-  String appName = 'Empyreal Keys';
+  String appName = 'Piano';
   String packageName = '';
   String version = '';
   String buildNumber = '';

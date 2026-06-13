@@ -153,7 +153,7 @@ class _PlayAlongPanelState extends State<PlayAlongPanel> {
             ),
           ),
 
-          // Scrolling score placeholder
+          // Scrolling Score Widget
           Expanded(
             child: ScrollingScoreWidget(
               recording: playAlongService.currentPiece!,

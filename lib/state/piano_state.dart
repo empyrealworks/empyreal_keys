@@ -12,6 +12,7 @@ class PianoState with ChangeNotifier {
   PianoState() {
     _prefsBox = Hive.box('pianoPrefs');
     _initialize();
+
     _connSub = Connectivity().onConnectivityChanged.listen((status) {
       if (status.contains(ConnectivityResult.none)) {
         resetInstrument(); // auto‑reset when you go offline
@@ -27,6 +28,11 @@ class PianoState with ChangeNotifier {
 
   void _initialize() async {
     await _loadFromHive();
+
+    // ✅ On every app launch, reset _showingScore
+    _showingScore = false;
+
+    notifyListeners();
   }
 
   Future<void> _loadFromHive() async {
@@ -59,6 +65,7 @@ class PianoState with ChangeNotifier {
   double? _panelHeight;
   String? _selectedPiece;
   Set<int> _activePlayAlongNotes = {};
+  Set<int> _pressedNotes = {};
 
 
   // Recorder State
@@ -203,19 +210,18 @@ class PianoState with ChangeNotifier {
   String? get selectedPiece => _selectedPiece;
   bool get showingScore => _showingScore;
   Set<int> get activePlayAlongNotes => _activePlayAlongNotes;
+  Set<int> get pressedNotes => _pressedNotes;
 
 
   void showScore(String piece, double screenHeight) {
     _selectedPiece = piece;
     _showingScore = true;
-    setPanelHeight(screenHeight / 1.8);
     notifyListeners();
   }
 
   void hideScore(double screenHeight) {
     _selectedPiece = null;
     _showingScore = false;
-    setPanelHeight(screenHeight / 3.5);
     notifyListeners();
   }
 
@@ -223,12 +229,6 @@ class PianoState with ChangeNotifier {
   void setLoopEnabled(bool val) {
     _loopEnabled = val;
     _prefsBox.put('loopEnabled', val);
-    notifyListeners();
-  }
-
-  void setPanelHeight(double val) {
-    _panelHeight = val;
-    _prefsBox.put('panelHeight', val);
     notifyListeners();
   }
 
@@ -250,6 +250,23 @@ class PianoState with ChangeNotifier {
   void clearActivePlayAlongNotes() {
     _activePlayAlongNotes.clear();
     notifyListeners();
+  }
+
+  void setPressedNotes(Set<int> notes) {
+    _pressedNotes = notes;
+    notifyListeners();
+  }
+
+  void addPressedNote(int note) {
+    if (_pressedNotes.add(note)) {
+      notifyListeners();
+    }
+  }
+
+  void removePressedNote(int note) {
+    if (_pressedNotes.remove(note)) {
+      notifyListeners();
+    }
   }
 
   //Metronome Setters

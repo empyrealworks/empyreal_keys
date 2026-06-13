@@ -1,6 +1,7 @@
 // services/recording_migrator.dart
 // Helper to migrate old recordings to new format with metadata
 
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import '../models/recording.dart';
 import '../models/note_event.dart';
@@ -183,7 +184,9 @@ class RecordingMigrator {
 
   /// Migrate all recordings in a box
   static Future<void> migrateAllRecordings(Box<Recording> box) async {
-    print('Starting recording migration...');
+    if (kDebugMode) {
+      print('Starting recording migration...');
+    }
     int migratedCount = 0;
 
     for (var key in box.keys) {
@@ -195,6 +198,8 @@ class RecordingMigrator {
       }
     }
 
-    print('Migration complete. Migrated $migratedCount recordings.');
+    if (kDebugMode) {
+      print('Migration complete. Migrated $migratedCount recordings.');
+    }
   }
 }

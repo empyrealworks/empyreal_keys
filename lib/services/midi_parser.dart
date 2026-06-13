@@ -1,5 +1,6 @@
 // services/midi_parser.dart (Enhanced with metadata extraction)
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
+
 import '../models/note_event.dart';
 import '../models/recording.dart';
 
@@ -97,7 +98,6 @@ class MidiParser {
           }
 
           final statusType = status & 0xF0;
-          final channel = status & 0x0F;
 
           // Parse event based on status
           if (statusType == 0x90) {
@@ -218,7 +218,9 @@ class MidiParser {
       // Sort events by timestamp
       events.sort((a, b) => a.timestamp.compareTo(b.timestamp));
     } catch (e) {
-      print('MIDI parsing error: $e');
+      if (kDebugMode) {
+        print('MIDI parsing error: $e');
+      }
       // Return empty recording on error with default metadata
       metadata ??= MidiMetadata(ticksPerQuarterNote: 480);
     }

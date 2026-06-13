@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:empyrealkeys/components/control_panel/knob_widget.dart';
 import 'package:empyrealkeys/components/control_panel/play_along_panel.dart';
@@ -126,7 +125,7 @@ class _ControlPanelState extends State<ControlPanel> {
               bottomRight: Radius.circular(15),
               bottomLeft: Radius.circular(15))),
       width: double.infinity,
-      height: pianoState.panelHeight ?? screenHeight / 3.5,
+      height: pianoState.showingScore ? screenHeight / 1.8 : screenHeight / 3.5,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -209,7 +208,7 @@ class _ControlPanelState extends State<ControlPanel> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         OctaveSelector(),
-                        Display(),
+                        Flexible(child: Display()),
                         Listener(
                           onPointerDown: (_) {
                             setState(() {

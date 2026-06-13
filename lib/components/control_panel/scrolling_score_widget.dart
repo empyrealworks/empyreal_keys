@@ -5,7 +5,6 @@ import 'package:empyrealkeys/components/notation/staff_notation_view.dart';
 import 'package:flutter/material.dart';
 import '../../models/note_event.dart';
 import '../../models/recording.dart';
-import '../debug/quantization_test_widget.dart';
 
 enum ScoreViewMode { pianoRoll, staff }
 
@@ -43,6 +42,7 @@ class _ScrollingScoreWidgetState extends State<ScrollingScoreWidget> {
                 recording: widget.recording,
                 currentPosition: widget.currentPosition,
                 screenHeight: widget.screenHeight,
+                scrollMode: NotationScrollMode.vertical,
               ),
 
         // Floating toggle button in top-right corner
@@ -55,7 +55,7 @@ class _ScrollingScoreWidgetState extends State<ScrollingScoreWidget> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: 0.3),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -197,7 +197,7 @@ class _PianoRollView extends StatelessWidget {
       decoration: BoxDecoration(
         color: Color(0xFF1A1A1A),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
@@ -233,9 +233,9 @@ class _PianoRollView extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Theme.of(context).primaryColor.withOpacity(0.3),
+                      Theme.of(context).primaryColor.withValues(alpha: 0.3),
                       Theme.of(context).primaryColor,
-                      Theme.of(context).primaryColor.withOpacity(0.3),
+                      Theme.of(context).primaryColor.withValues(alpha: 0.3),
                     ],
                   ),
                 ),
@@ -247,7 +247,7 @@ class _PianoRollView extends StatelessWidget {
               right: 0,
               child: Container(
                 height: 20,
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 child: CustomPaint(
                   painter: TimeMarkerPainter(
                     currentPosition: currentPosition,
@@ -300,7 +300,7 @@ class ScorePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final linePaint = Paint()
-      ..color = Colors.white.withOpacity(0.05)
+      ..color = Colors.white.withValues(alpha: 0.05)
       ..strokeWidth = 1;
 
     for (int i = minPitch; i <= maxPitch; i++) {
@@ -310,7 +310,7 @@ class ScorePainter extends CustomPainter {
           Offset(0, y),
           Offset(size.width, y),
           Paint()
-            ..color = Colors.white.withOpacity(0.15)
+            ..color = Colors.white.withValues(alpha: 0.15)
             ..strokeWidth = 1,
         );
       } else {
@@ -346,7 +346,7 @@ class ScorePainter extends CustomPainter {
         ..style = PaintingStyle.fill;
 
       final glowPaint = Paint()
-        ..color = noteColor.withOpacity(0.3)
+        ..color = noteColor.withValues(alpha: 0.3)
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, 4);
 
       final rect = RRect.fromRectAndRadius(
@@ -389,7 +389,7 @@ class TimeMarkerPainter extends CustomPainter {
     );
 
     final textStyle = TextStyle(
-      color: Colors.white.withOpacity(0.6),
+      color: Colors.white.withValues(alpha: 0.6),
       fontSize: 10,
     );
 
