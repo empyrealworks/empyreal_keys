@@ -13,22 +13,16 @@ class BlackKey extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final octave = context.select<PianoState, int>((s) => s.octave);
+    final pianoState = Provider.of<PianoState>(context);
+    final octave = pianoState.octave;
     final midiNote = 12 + (octave * 12) + idx;
-    
-    final isPressed = context.select<PianoState, bool>(
-      (s) => s.pressedNotes.contains(midiNote)
-    );
-    final isPlayAlong = context.select<PianoState, bool>(
-      (s) => s.activePlayAlongNotes.contains(midiNote)
-    );
-    
-    final showingScore = context.select<PianoState, bool>((s) => s.showingScore);
-    final screenHeight = MediaQuery.of(context).size.height;
+    final isHighlighted = pianoState.activePlayAlongNotes.contains(midiNote);
+    final isPressed = pianoState.pressedNotes.contains(midiNote);
 
-    final double keyHeight = showingScore
-        ? screenHeight * 0.194
-        : screenHeight * 0.33;
+    // same height logic you had before
+    final double keyHeight = pianoState.showingScore
+        ? pianoState.panelHeight! * 0.35
+        : MediaQuery.of(context).size.height * 0.33;
 
     return SizedBox(
       width: keyWidth,
@@ -36,6 +30,7 @@ class BlackKey extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.hardEdge,
         children: [
+          // main black key body
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
@@ -46,32 +41,38 @@ class BlackKey extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: isPlayAlong
+                colors: isHighlighted
                     ? const [Color(0xFF01353A), Color(0xFF054B50)]
-                    : isPressed
-                        ? const [Color(0xFF333333), Color(0xFF555555)]
-                        : const [Color(0xFF0B0B0B), Color(0xFF222222)],
+                    : const [Color(0xFF0B0B0B), Color(0xFF222222)],
                 stops: const [0.0, 1.0],
               ),
               boxShadow: [
+                // drop shadow to suggest height
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.55),
+                  color: Colors.black.withOpacity(0.55),
                   offset: const Offset(3, 6),
                   blurRadius: 10,
                 ),
+                // subtle rim highlight on left/top edge
                 BoxShadow(
-                  color: Colors.white.withValues(alpha: 0.03),
+                  color: Colors.white.withOpacity(0.03),
                   offset: const Offset(-1, -1),
+                  blurRadius: 2,
+                ),
+                // subtle rim highlight on bottom/right edge
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.03),
+                  offset: const Offset(-1, 1),
                   blurRadius: 2,
                 ),
               ],
               border: isPressed
-                  ? Border.all(color: Colors.white.withValues(alpha: 0.12), width: 1.2)
+                  ? Border.all(color: Colors.white.withOpacity(0.12), width: 1.2)
                   : null,
             ),
           ),
 
-          // specular top highlight
+          // specular top highlight (thin glossy streak)
           Positioned(
             left: 4,
             right: 4,
@@ -85,8 +86,8 @@ class BlackKey extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.white.withValues(alpha: 0.12),
-                      Colors.white.withValues(alpha: 0.06),
+                      Colors.white.withOpacity(0.12),
+                      Colors.white.withOpacity(0.06),
                       Colors.transparent,
                     ],
                     stops: const [0.0, 0.35, 1.0],
@@ -95,14 +96,103 @@ class BlackKey extends StatelessWidget {
               ),
             ),
           ),
-          
-          // pressed/highlight overlay
+          // specular bottom highlight (thin glossy streak)
+          Positioned(
+            left: 6,
+            right: 6,
+            bottom: 10,
+            height: keyHeight * 0.18,
+            child: IgnorePointer(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                  gradient: LinearGradient(
+                    end: Alignment.topCenter,
+                    begin: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white.withOpacity(isPressed ? 0.20 : 0.12),
+                      Colors.white.withOpacity(0.06),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.35, 1.0],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // thin lateral highlight for glossy bevel
+          Positioned(
+            left: 6,
+            top: 6,
+            bottom: 15,
+            width: 2,
+            child: IgnorePointer(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withOpacity(0.06),
+                      Colors.white.withOpacity(0.06),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // thin lateral highlight for glossy bevel
+          Positioned(
+            left: 6,
+            top: 6,
+            bottom: 15,
+            width: 2,
+            child: IgnorePointer(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    end: Alignment.topLeft,
+                    begin: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withOpacity(0.06),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // thin lateral highlight for glossy bevel
+          Positioned(
+            right: 6,
+            top: 6,
+            bottom: 15,
+            width: 2,
+            child: IgnorePointer(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    end: Alignment.topLeft,
+                    begin: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withOpacity(0.06),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // pressed/highlight overlay (subtle)
           if (isPressed)
             Positioned.fill(
               child: IgnorePointer(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
+                    color: Colors.white.withOpacity(0.02),
                     borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(6),
                       bottomRight: Radius.circular(6),

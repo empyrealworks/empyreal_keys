@@ -17,18 +17,11 @@ class WhiteKey extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final octave = context.select<PianoState, int>((s) => s.octave);
+    final pianoState = Provider.of<PianoState>(context);
+    final octave = pianoState.octave;
     final midiNote = 12 + (octave * 12) + idx;
-    
-    // Listen to whether this specific note is pressed
-    final isPressed = context.select<PianoState, bool>(
-      (s) => s.pressedNotes.contains(midiNote)
-    );
-    
-    // Listen to whether it's highlighted for play-along
-    final isPlayAlong = context.select<PianoState, bool>(
-      (s) => s.activePlayAlongNotes.contains(midiNote)
-    );
+    final isHighlighted = pianoState.activePlayAlongNotes.contains(midiNote);
+    final isPressed = pianoState.pressedNotes.contains(midiNote);
 
     return Stack(
       clipBehavior: Clip.hardEdge,
@@ -41,27 +34,27 @@ class WhiteKey extends StatelessWidget {
               end: Alignment.bottomCenter,
               colors: isPressed
                   ? [
-                Colors.grey.withValues(alpha: 0.2),
-                Colors.grey.withValues(alpha: 0.4),
+                Colors.grey.withOpacity(0.1),
+                Colors.grey.withOpacity(0.05),
               ]
-                  : isPlayAlong
+                  : isHighlighted
                   ? [
                 Colors.white,
-                Theme.of(context).primaryColor.withValues(alpha: 0.18),
+                Theme.of(context).primaryColor.withOpacity(0.18),
               ]
                   : [Colors.white, Colors.grey.shade100],
             ),
             borderRadius: _getBorderRadius(keyType),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
-                offset: const Offset(2, 3),
+                color: Colors.black.withOpacity(0.25),
+                offset: const Offset(2, 3), // slight right-down shadow
                 blurRadius: 6,
                 spreadRadius: 0,
               ),
               BoxShadow(
-                color: Colors.white.withValues(alpha: 0.6),
-                offset: const Offset(-1, -1),
+                color: Colors.white.withOpacity(0.6),
+                offset: const Offset(-1, -1), // subtle top-left highlight
                 blurRadius: 2,
               ),
             ],
