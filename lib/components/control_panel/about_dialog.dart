@@ -22,6 +22,7 @@ class _AboutDialogWidgetState extends State<AboutDialogWidget> {
 
   Future<void> _initPackageInfo() async {
     final info = await PackageInfo.fromPlatform();
+    if (!mounted) return;
     setState(() {
       appName = info.appName;
       packageName = info.packageName;
@@ -40,7 +41,7 @@ class _AboutDialogWidgetState extends State<AboutDialogWidget> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: 360),
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -85,7 +86,27 @@ class _AboutDialogWidgetState extends State<AboutDialogWidget> {
                     .copyWith(color: Colors.grey[700]),
               ),
 
-              const SizedBox(height: 24),
+              TextButton(
+                onPressed: () => showDialog<void>(
+                  context: context,
+                  builder: (dialog) => AlertDialog(
+                    title: const Text('Privacy Policy'),
+                    scrollable: true,
+                    content: const Text(
+                      'Empyreal Keys is made by Empyreal Works. The app has no user accounts or ads. '
+                      'Piano settings and recordings are stored on your device. You can delete recordings in the app or remove local app data in your device settings.\n\n'
+                      'Online soundfont downloads use Google Firebase Storage. Firebase App Check uses Google Play Integrity on Android to verify requests. '
+                      'Google processes network and app or device integrity information to deliver downloads and protect the service.\n\n'
+                      'For privacy questions, email hello@empyrealworks.com.',
+                    ),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(dialog), child: const Text('Close')),
+                    ],
+                  ),
+                ),
+                child: const Text('Privacy Policy'),
+              ),
+              const SizedBox(height: 8),
               // Easter-egg tap target
               GestureDetector(
                 onTap: () {
