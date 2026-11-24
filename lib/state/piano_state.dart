@@ -36,7 +36,6 @@ class PianoState with ChangeNotifier {
   }
 
   Future<void> _loadFromHive() async {
-    _panelHeight = _prefsBox.get('panelHeight', defaultValue: null);
     _currentNote = _prefsBox.get('currentNote', defaultValue: '..');
     _volume = _prefsBox.get('volume', defaultValue: 75);
     _octave = _prefsBox.get('octave', defaultValue: 3);
@@ -62,7 +61,6 @@ class PianoState with ChangeNotifier {
   // PlayAlong State
   bool _loopEnabled = false;
   bool _showingScore = false;
-  double? _panelHeight;
   String? _selectedPiece;
   Set<int> _activePlayAlongNotes = {};
   Set<int> _pressedNotes = {};
@@ -206,7 +204,6 @@ class PianoState with ChangeNotifier {
   List<Recording> get recordings => List.unmodifiable(_recordings);
   //Playalong Getters
   bool get loopEnabled => _loopEnabled;
-  double? get panelHeight => _panelHeight;
   String? get selectedPiece => _selectedPiece;
   bool get showingScore => _showingScore;
   Set<int> get activePlayAlongNotes => _activePlayAlongNotes;

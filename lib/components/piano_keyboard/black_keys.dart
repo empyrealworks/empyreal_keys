@@ -19,10 +19,12 @@ class BlackKey extends StatelessWidget {
     final isHighlighted = pianoState.activePlayAlongNotes.contains(midiNote);
     final isPressed = pianoState.pressedNotes.contains(midiNote);
 
-    // same height logic you had before
+    // While the score is showing, the control panel takes screenHeight / 1.8
+    // (see piano_controls.dart), so the black keys shrink with it.
+    final screenHeight = MediaQuery.sizeOf(context).height;
     final double keyHeight = pianoState.showingScore
-        ? pianoState.panelHeight! * 0.35
-        : MediaQuery.of(context).size.height * 0.33;
+        ? (screenHeight / 1.8) * 0.35
+        : screenHeight * 0.33;
 
     return SizedBox(
       width: keyWidth,
