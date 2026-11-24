@@ -1,2 +1,0 @@
-D:/Projects/empyrealkeys/android/app/.cxx/RelWithDebInfo/2k2p6b4l/x86/CMakeFiles/edit_cache.dir
-D:/Projects/empyrealkeys/android/app/.cxx/RelWithDebInfo/2k2p6b4l/x86/CMakeFiles/rebuild_cache.dir
