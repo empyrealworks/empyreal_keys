@@ -11,9 +11,11 @@ class PlayAlongService with ChangeNotifier {
   double _playbackPosition = 0.0; // in seconds
   double _tempoMultiplier = 1.0; // 0.5 to 1.5
   Timer? _playbackTimer;
+  // The clock: position = _basePosition + time since _playbackStartTime
+  // (scaled by tempo). Every seek, loop, resume or tempo change restarts it
+  // from the current position.
   DateTime? _playbackStartTime;
-  DateTime? _pausedAt;
-  Duration _pausedDuration = Duration.zero;
+  double _basePosition = 0.0;
   int _currentEventIndex = 0;
 
   // Loop controls
@@ -82,8 +84,7 @@ class PlayAlongService with ChangeNotifier {
     this.onActiveNotesChanged = onActiveNotesChanged;
     _isPlaying = true;
     _isPaused = false;
-    _playbackStartTime = DateTime.now();
-    _pausedDuration = Duration.zero;
+    _restartClock(_playbackPosition);
 
     // Find starting event index based on playback position
     _currentEventIndex = _findEventIndexAtPosition(_playbackPosition);
@@ -105,15 +106,13 @@ class PlayAlongService with ChangeNotifier {
       if (!_isPlaying || _isPaused) return;
 
       final elapsed = DateTime.now().difference(_playbackStartTime!).inMilliseconds;
-      final adjustedElapsed = (elapsed - _pausedDuration.inMilliseconds) * _tempoMultiplier;
-      _playbackPosition = adjustedElapsed / 1000.0;
+      _playbackPosition = _basePosition + elapsed * _tempoMultiplier / 1000.0;
 
       // Check loop boundaries
       if (_loopEnd != null && _playbackPosition >= _loopEnd!) {
         _playbackPosition = _loopStart ?? 0.0;
         _currentEventIndex = _findEventIndexAtPosition(_playbackPosition);
-        _playbackStartTime = DateTime.now();
-        _pausedDuration = Duration.zero;
+        _restartClock(_playbackPosition);
         activeNotes.clear();
         onActiveNotesChanged?.call(activeNotes);
         notifyListeners();
@@ -151,8 +150,7 @@ class PlayAlongService with ChangeNotifier {
         if (_loopStart != null || _currentPiece!.loopPlayback) {
           _playbackPosition = _loopStart ?? 0.0;
           _currentEventIndex = _findEventIndexAtPosition(_playbackPosition);
-          _playbackStartTime = DateTime.now();
-          _pausedDuration = Duration.zero;
+          _restartClock(_playbackPosition);
           activeNotes.clear();
           onActiveNotesChanged?.call(activeNotes);
         } else {
@@ -167,7 +165,6 @@ class PlayAlongService with ChangeNotifier {
   void pausePlayback() {
     if (!_isPlaying || _isPaused) return;
     _isPaused = true;
-    _pausedAt = DateTime.now();
 
     // turn off all currently active notes
     onActiveNotesChanged?.call({});
@@ -177,8 +174,7 @@ class PlayAlongService with ChangeNotifier {
   void resumePlayback() {
     if (!_isPlaying || !_isPaused) return;
     _isPaused = false;
-    // add this pause duration to total paused time
-    _pausedDuration += DateTime.now().difference(_pausedAt!);
+    _restartClock(_playbackPosition);
     notifyListeners();
   }
 
@@ -190,7 +186,7 @@ class PlayAlongService with ChangeNotifier {
     _playbackPosition = 0.0;
     _currentEventIndex = 0;
     _playbackStartTime = null;
-    _pausedDuration = Duration.zero;
+    _basePosition = 0.0;
 
     // Clear active notes
     onActiveNotesChanged?.call({});
@@ -202,12 +198,14 @@ class PlayAlongService with ChangeNotifier {
     _playbackPosition = position.clamp(0.0, totalDuration);
     _currentEventIndex = _findEventIndexAtPosition(_playbackPosition);
 
-    if (_isPlaying) {
-      _playbackStartTime = DateTime.now();
-      _pausedDuration = Duration.zero;
-    }
+    if (_isPlaying) _restartClock(_playbackPosition);
 
     notifyListeners();
+  }
+
+  void _restartClock(double from) {
+    _basePosition = from;
+    _playbackStartTime = DateTime.now();
   }
 
   // Find event index at given position

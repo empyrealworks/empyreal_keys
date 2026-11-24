@@ -41,8 +41,6 @@ class _ScrollingScoreWidgetState extends State<ScrollingScoreWidget> {
             : StaffNotationView(
                 recording: widget.recording,
                 currentPosition: widget.currentPosition,
-                screenHeight: widget.screenHeight,
-                scrollMode: NotationScrollMode.vertical,
               ),
 
         // Floating toggle button in top-right corner
