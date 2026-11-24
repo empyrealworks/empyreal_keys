@@ -490,10 +490,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_music_notation
-      sha256: "6bdf11279261b3e9eb72ab26a6203a14f56e2a10ea8c43b46cb526091c2af12c"
+      sha256: "0aee272f983402f2f41bd15c1c997f0ed86c3d4b7f2d1b97783a65ab630c6b39"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.0"
+    version: "0.4.1"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
